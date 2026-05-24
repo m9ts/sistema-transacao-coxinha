@@ -3,6 +3,8 @@ package com.sistemabankcoxinha.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "clientes")
 
@@ -19,4 +21,7 @@ public class Cliente {
     private Long id;
     private String nome;
     private Double saldo;
+
+    @OneToMany(mappedBy = "cliente")
+    private List<Movimentacao> movimentacoes;
 }
