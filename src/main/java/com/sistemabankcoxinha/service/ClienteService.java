@@ -1,5 +1,6 @@
 package com.sistemabankcoxinha.service;
 
+import com.sistemabankcoxinha.dto.ExtratoResponseDTO;
 import com.sistemabankcoxinha.model.Cliente;
 import com.sistemabankcoxinha.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +14,31 @@ public class ClienteService {
     @Autowired
     private ClienteRepository clienteRepository;
 
-    // salvando no banco
+    // salvar cliente
     public Cliente salvarCliente(Cliente cliente) {
         return clienteRepository.save(cliente);
     }
 
-    // listando todos os clientes
+    // listar todos os clientes
     public List<Cliente> listarClientes() {
         return clienteRepository.findAll();
+    }
+
+    // obter extrato do cliente
+    public ExtratoResponseDTO obterExtrato(Long clienteId) {
+
+        Cliente cliente = clienteRepository.findById(clienteId).orElse(null);
+
+        if (cliente == null) {
+            throw new RuntimeException("Cliente não encontrado");
+        }
+
+        ExtratoResponseDTO extrato = new ExtratoResponseDTO();
+
+        extrato.setCliente(cliente.getNome());
+        extrato.setSaldo(cliente.getSaldo());
+        extrato.setMovimentacoes(cliente.getMovimentacoes());
+
+        return extrato;
     }
 }

@@ -1,4 +1,5 @@
 package com.sistemabankcoxinha.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,5 +28,6 @@ public class Movimentacao {
 
     @ManyToOne
     @JoinColumn(name = "cliente_id")
+    @JsonIgnore
     private Cliente cliente;
 }

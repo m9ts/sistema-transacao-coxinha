@@ -1,5 +1,6 @@
 package com.sistemabankcoxinha.controller;
 
+import com.sistemabankcoxinha.dto.ExtratoResponseDTO;
 import com.sistemabankcoxinha.model.Cliente;
 import com.sistemabankcoxinha.service.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,5 +24,10 @@ public class ClienteController {
     @GetMapping
     public List<Cliente> listarClientes() {
         return clienteService.listarClientes();
+    }
+
+    @GetMapping("/{id}/extrato")
+    public ExtratoResponseDTO extrato(@PathVariable Long id) {
+        return clienteService.obterExtrato(id);
     }
 }
