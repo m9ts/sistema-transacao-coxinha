@@ -1,6 +1,7 @@
 package com.sistemabankcoxinha.service;
 
 import com.sistemabankcoxinha.dto.CompraRequestDTO;
+import com.sistemabankcoxinha.dto.CompraResponseDTO;
 import com.sistemabankcoxinha.model.Cliente;
 import com.sistemabankcoxinha.model.Movimentacao;
 import com.sistemabankcoxinha.model.SlotNota;
@@ -28,7 +29,7 @@ public class CompraService {
     @Autowired
     private SlotNotaRepository slotNotaRepository;
 
-    public String comprar(CompraRequestDTO dto) {
+    public CompraResponseDTO comprar(CompraRequestDTO dto) {
 
         Cliente cliente = clienteRepository.findById(dto.getClienteId())
                 .orElseThrow(() ->
@@ -42,7 +43,6 @@ public class CompraService {
         int notaInserida = dto.getNotaInserida();
 
         if (notaInserida < valorCoxinha) {
-
             throw new RuntimeException("Valor insuficiente!");
         }
 
@@ -67,6 +67,14 @@ public class CompraService {
 
         movimentacaoRepository.save(movimentacao);
 
-        return "Compra realizada com sucesso.";
+        CompraResponseDTO response = new CompraResponseDTO();
+
+        response.setMensagem("Compra realizada com sucesso.");
+        response.setSabor(coxinha.getSabor());
+        response.setValorCompra(valorCoxinha);
+        response.setValorPago(notaInserida);
+        response.setTroco((int) troco);
+
+        return response;
     }
 }
