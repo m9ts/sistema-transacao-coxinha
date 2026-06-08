@@ -1,5 +1,8 @@
 package com.sistemabankcoxinha.patterns.factory;
 
+import com.sistemabankcoxinha.patterns.decorator.CoxinhaRecheioDecorator;
+import com.sistemabankcoxinha.patterns.decorator.DescontoDecorator;
+
 public class CoxinhaFactory {
 
     public static Coxinha criarCoxinha(String sabor) {
@@ -11,6 +14,10 @@ public class CoxinhaFactory {
                 return new CoxinhaCostela();
             case "carne":
                 return new CoxinhaCarne();
+            case "frango especial":
+                return new CoxinhaRecheioDecorator(new CoxinhaFrango());
+            case "carne desconto":
+                return new DescontoDecorator((new CoxinhaCarne()), 10);
             default:
                 throw new IllegalArgumentException("Sabor inválido!");
         }

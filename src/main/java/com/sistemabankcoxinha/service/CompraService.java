@@ -7,6 +7,7 @@ import com.sistemabankcoxinha.model.Movimentacao;
 import com.sistemabankcoxinha.model.SlotNota;
 import com.sistemabankcoxinha.patterns.factory.Coxinha;
 import com.sistemabankcoxinha.patterns.factory.CoxinhaFactory;
+import com.sistemabankcoxinha.patterns.observer.CompraDisparaEvento;
 import com.sistemabankcoxinha.patterns.strategy.TrocoPadraoStrategy;
 import com.sistemabankcoxinha.repository.ClienteRepository;
 import com.sistemabankcoxinha.repository.MovimentacaoRepository;
@@ -28,6 +29,9 @@ public class CompraService {
 
     @Autowired
     private SlotNotaRepository slotNotaRepository;
+
+    @Autowired
+    private CompraDisparaEvento compraDisparaEvento;
 
     public CompraResponseDTO comprar(CompraRequestDTO dto) {
 
@@ -66,6 +70,8 @@ public class CompraService {
                         .build();
 
         movimentacaoRepository.save(movimentacao);
+
+        compraDisparaEvento.publicar(movimentacao);
 
         CompraResponseDTO response = new CompraResponseDTO();
 
