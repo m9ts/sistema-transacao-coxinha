@@ -8,6 +8,6 @@ public class CoxinhaCarne implements Coxinha {
 
     @Override
     public Double getPreco() {
-        return 9.0;
+        return 10.0;
     }
 }

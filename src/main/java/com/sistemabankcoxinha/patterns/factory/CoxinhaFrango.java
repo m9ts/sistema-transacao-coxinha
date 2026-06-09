@@ -8,6 +8,6 @@ public class CoxinhaFrango implements Coxinha{
 
     @Override
     public Double getPreco() {
-        return 8.50;
+        return 8.0;
     }
 }

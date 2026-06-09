@@ -16,8 +16,8 @@ public class CoxinhaFactory {
                 return new CoxinhaCarne();
             case "frango especial":
                 return new CoxinhaRecheioDecorator(new CoxinhaFrango());
-            case "carne desconto":
-                return new DescontoDecorator((new CoxinhaCarne()), 10);
+            case "carne especial":
+                return new DescontoDecorator((new CoxinhaCarne()), 20);
             default:
                 throw new IllegalArgumentException("Sabor inválido!");
         }

@@ -12,7 +12,7 @@ public class CoxinhaRecheioDecorator extends CoxinhaDecorator {
         return coxinhaBase.getPreco() + 2.0;
     }
 
-    public String getsabor() {
-        return coxinhaBase.getPreco() + " Especial";
+    public String getSabor() {
+        return coxinhaBase.getSabor() + " Especial";
     }
 }
