@@ -3,8 +3,7 @@ package com.sistemabankcoxinha.service;
 import com.sistemabankcoxinha.dto.CompraRequestDTO;
 import com.sistemabankcoxinha.dto.CompraResponseDTO;
 import com.sistemabankcoxinha.model.Cliente;
-import com.sistemabankcoxinha.model.Movimentacao;
-import com.sistemabankcoxinha.model.SlotNota;
+import com.sistemabankcoxinha.patterns.command.ComprarCoxinhaCommand;
 import com.sistemabankcoxinha.patterns.factory.Coxinha;
 import com.sistemabankcoxinha.patterns.factory.CoxinhaFactory;
 import com.sistemabankcoxinha.patterns.observer.CompraDisparaEvento;
@@ -14,9 +13,6 @@ import com.sistemabankcoxinha.repository.MovimentacaoRepository;
 import com.sistemabankcoxinha.repository.SlotNotaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class CompraService {
@@ -34,52 +30,30 @@ public class CompraService {
     private CompraDisparaEvento compraDisparaEvento;
 
     public CompraResponseDTO comprar(CompraRequestDTO dto) {
-
         Cliente cliente = clienteRepository.findById(dto.getClienteId())
-                .orElseThrow(() ->
-                        new RuntimeException("Cliente não encontrado!"));
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
-        Coxinha coxinha =
-                CoxinhaFactory.criarCoxinha(dto.getSabor());
+        Coxinha coxinha = CoxinhaFactory.criarCoxinha(dto.getSabor());
 
-        double valorCoxinha = coxinha.getPreco();
+        ComprarCoxinhaCommand command = new ComprarCoxinhaCommand(
+                cliente,
+                coxinha,
+                new TrocoPadraoStrategy(),
+                clienteRepository,
+                movimentacaoRepository,
+                slotNotaRepository
+        );
+        command.executar();
 
-        int notaInserida = dto.getNotaInserida();
-
-        if (notaInserida < valorCoxinha) {
-            throw new RuntimeException("Valor insuficiente!");
-        }
-
-        double troco = notaInserida - valorCoxinha;
-
-        List<SlotNota> slots =
-                slotNotaRepository.findAll();
-
-        TrocoPadraoStrategy strategy =
-                new TrocoPadraoStrategy();
-
-        strategy.calcularTroco(troco, slots);
-
-        Movimentacao movimentacao =
-                Movimentacao.builder()
-                        .cliente(cliente)
-                        .sabor(coxinha.getSabor())
-                        .valor(valorCoxinha)
-                        .tipoOperacao("COMPRA")
-                        .dataHora(LocalDateTime.now())
-                        .build();
-
-        movimentacaoRepository.save(movimentacao);
-
-        compraDisparaEvento.publicar(movimentacao);
+        // dispara os observers
+        compraDisparaEvento.publicar(command.getMovimentacao());
 
         CompraResponseDTO response = new CompraResponseDTO();
-
-        response.setMensagem("Compra realizada com sucesso.");
+        response.setMensagem("Compra realizada com sucesso. Troco dado em notas.");
         response.setSabor(coxinha.getSabor());
-        response.setValorCompra(valorCoxinha);
-        response.setValorPago(notaInserida);
-        response.setTroco((int) troco);
+        response.setValorCompra(coxinha.getPreco());
+        response.setValorPago((int) (coxinha.getPreco() + command.getTrocoValor()));
+        response.setTroco((int) command.getTrocoValor());
 
         return response;
     }
