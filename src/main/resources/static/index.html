@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Banca da Coxinha • Caixa Eletrônico de Salgados</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav id="navbar" style="display: none">
+    <div class="nav-logo"><span>Coxinha</span> Bank</div>
+    <div class="nav-links">
+        <a onclick="showPage('home')" id="nav-home" class="active">Cardápio</a>
+        <a onclick="showPage('extrato')" id="nav-extrato">Extrato</a>
+        <a onclick="showPage('slots')" id="nav-slots">Cédulas</a>
+    </div>
+    <div class="nav-right">
+        <div id="saldo-display">💰 R$ <span id="saldo-valor">0,00</span></div>
+        <button id="btn-logout" onclick="logout()">Sair</button>
+    </div>
+</nav>
+
+<div id="page-login" class="page active">
+    <div class="login-wrapper">
+        <div class="login-card">
+            <h1>Bem-vindo ao <br><span>Coxinha Bank!</span></h1>
+            <p>Entre com seu cadastro ou crie uma conta nova.</p>
+
+            <div class="login-tabs">
+                <button id="tab-login" class="active" onclick="switchTab('login')">Entrar</button>
+                <button id="tab-cadastro" onclick="switchTab('cadastro')">Cadastrar</button>
+            </div>
+
+            <div id="form-login">
+                <div class="form-group">
+                    <label>Selecione seu cadastro</label>
+                    <select id="select-cliente">
+                        <option value="">Carregando clientes...</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="fazerLogin()">Entrar na Banca →</button>
+            </div>
+
+            <div id="form-cadastro" style="display:none">
+                <div class="form-group">
+                    <label>Seu nome</label>
+                    <input type="text" id="input-nome" placeholder="Ex: João da Silva">
+                </div>
+                <button class="btn-primary" onclick="cadastrarCliente()">Criar conta →</button>
+                <div class="login-divider">ou</div>
+                <button class="btn-secondary" onclick="switchTab('login')">Já tenho conta</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="page-home" class="page">
+    <div class="hero">
+        <div class="hero-text">
+            <h1>Desperte com<br>uma <span>Coxinha</span><br>fresquinha!</h1>
+            <div class="hero-actions">
+                <button class="btn-hero" onclick="document.getElementById('cardapio-section').scrollIntoView({behavior:'smooth'})">Ver cardápio ↓</button>
+                <button class="btn-hero-outline" onclick="showPage('extrato')">Meu extrato</button>
+            </div>
+        </div>
+
+        <div class="credito-box fade-in">
+            <h3>Inserir crédito</h3>
+            <p style="font-size:0.83rem;margin-bottom:14px">Escolha uma nota para inserir:</p>
+            <div class="notas-grid" id="notas-grid"></div>
+            <div class="nota-selecionada-area">
+                <span>Nota selecionada:</span>
+                <span id="nota-selecionada">—</span>
+            </div>
+            <button class="btn-inserir" onclick="inserirCredito()">Inserir nota</button>
+        </div>
+    </div>
+
+    <div id="cardapio-section">
+        <div class="section-title"><span class="dot-accent"></span>Nosso Cardápio</div>
+        <div class="cardapio-grid" id="cardapio-grid"></div>
+    </div>
+
+    <div class="trocar-sabor-area">
+        <h3>Trocar sabor</h3>
+        <p>Transferir o valor de uma coxinha reservada para outro sabor.</p>
+        <div class="trocar-form">
+            <select id="sabor-origem">
+                <option value="">Sabor original</option>
+            </select>
+            <select id="sabor-destino">
+                <option value="">Novo sabor</option>
+            </select>
+            <button class="btn-trocar" onclick="trocarSabor()">Transferir reserva</button>
+        </div>
+    </div>
+</div>
+
+<div id="page-extrato" class="page">
+    <div class="extrato-header fade-in">
+        <h1>Extrato de glutonaria</h1>
+        <p id="extrato-sub">Histórico completo das suas coxinhas</p>
+    </div>
+    <div class="saldo-card-extrato">
+        <div>Saldo atual</div>
+        <div class="saldo-valor-grande">R$ <span id="extrato-saldo">0,00</span></div>
+        <button class="btn-hero" onclick="carregarExtrato()">↻ Atualizar</button>
+    </div>
+    <table class="extrato-table">
+        <thead>
+        <tr><th>Data/Hora</th><th>Sabor</th><th>Tipo</th><th>Valor</th></tr>
+        </thead>
+        <tbody id="extrato-tbody">
+        <tr><td colspan="4"><div class="empty-state">🍽Nenhuma movimentação ainda...</div></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div id="page-slots" class="page">
+    <div class="slots-header fade-in">
+        <h1>Gestão de cédulas</h1>
+        <p>Disponibilidade de notas para troco (atualizado automaticamente)</p>
+    </div>
+    <div class="slots-grid" id="slots-grid">
+        <div style="grid-column:1/-1;text-align:center;padding:32px;">Carregando slots...</div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>
