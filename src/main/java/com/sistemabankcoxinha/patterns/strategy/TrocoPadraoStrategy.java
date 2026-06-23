@@ -14,12 +14,8 @@ public class TrocoPadraoStrategy implements TrocoStrategy {
 
         int restante = valorTroco.intValue();
 
-        slots.sort(new Comparator<SlotNota>() {
-            @Override
-            public int compare(SlotNota a, SlotNota b) {
-                return b.getValorNota() - a.getValorNota();
-            }
-        });
+        // ordenação de notas da maior para a menor
+        slots.sort((a, b) -> b.getValorNota() - a.getValorNota());
 
         for (SlotNota slot : slots) {
             int nota = slot.getValorNota();

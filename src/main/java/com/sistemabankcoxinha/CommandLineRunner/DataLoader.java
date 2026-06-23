@@ -19,11 +19,11 @@ public class DataLoader implements CommandLineRunner {
             for (int v : valores) {
                 SlotNota slot = SlotNota.builder()
                         .valorNota(v)
-                        .qtd(10) // quantidade inicial
+                        .qtd(5) // quantidade inicial
                         .build();
                 slotNotaRepository.save(slot);
             }
-            System.out.println("Slots de notas criados com 10 unidades cada.");
+            System.out.println("Slots de notas criados com 5 unidades cada.");
         }
     }
 }

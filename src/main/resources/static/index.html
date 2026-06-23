@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Banca da Coxinha • Caixa Eletrônico de Salgados</title>
+    <title>Coxinha Bank</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" type="image/png" href="images/icon.png">
 </head>
 <body>
 
@@ -40,7 +41,7 @@
                         <option value="">Carregando clientes...</option>
                     </select>
                 </div>
-                <button class="btn-primary" onclick="fazerLogin()">Entrar na Banca →</button>
+                <button class="btn-primary" onclick="fazerLogin()">Entrar no banco</button>
             </div>
 
             <div id="form-cadastro" style="display:none">
@@ -79,7 +80,7 @@
     </div>
 
     <div id="cardapio-section">
-        <div class="section-title"><span class="dot-accent"></span>Nosso Cardápio</div>
+        <div class="section-title"><span class="dot-accent"></span>Nosso cardápio</div>
         <div class="cardapio-grid" id="cardapio-grid"></div>
     </div>
 
@@ -113,7 +114,7 @@
         <tr><th>Data/Hora</th><th>Sabor</th><th>Tipo</th><th>Valor</th></tr>
         </thead>
         <tbody id="extrato-tbody">
-        <tr><td colspan="4"><div class="empty-state">🍽Nenhuma movimentação ainda...</div></td></tr>
+        <tr><td colspan="4"><div class="empty-state">Nenhuma movimentação ainda...</div></td></tr>
         </tbody>
     </table>
 </div>

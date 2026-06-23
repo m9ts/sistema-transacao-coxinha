@@ -2,11 +2,11 @@ const API = 'http://localhost:8080';
 const NOTAS = [2, 5, 10, 20, 50, 100, 200];
 
 const CARDAPIO = [
-    { sabor: 'frango', emoji: '🍗', preco: 8.0 },
-    { sabor: 'carne', emoji: '🥩', preco: 10.00 },
-    { sabor: 'costela', emoji: '🦴', preco: 10.00 },
-    { sabor: 'frango especial', emoji: '⭐', preco: 10.0 },   // Decorator
-    { sabor: 'carne especial', emoji: '🎯', preco: 11.0 }      // DescontoDecorator
+    { sabor: 'frango', emoji: '<img src="/images/coxinha.png" class="coxinha-img">', preco: 8.0 },
+    { sabor: 'carne', emoji: '<img src="/images/coxinha.png" class="coxinha-img">', preco: 10.00 },
+    { sabor: 'costela', emoji: '<img src="/images/coxinha.png" class="coxinha-img">', preco: 10.00 },
+    { sabor: 'frango especial', emoji: '<img src="/images/coxinha-especial.png" class="coxinha-img">', preco: 10.0 },
+    { sabor: 'carne especial', emoji: '<img src="/images/coxinha-especial.png" class="coxinha-img">', preco: 8.0 }
 ];
 
 let clienteLogado = null;

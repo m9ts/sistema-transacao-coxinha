@@ -47,7 +47,7 @@ nav {
     font-weight: 500;
     cursor: pointer;
 }
-.nav-links a:hover, .nav-links a.active { color: var(--brown); font-weight: 600; }
+.nav-links a:hover, .nav-links a.active { color: var(--yellow-dark); font-weight: 600; }
 .nav-right { display: flex; align-items: center; gap: 16px; }
 #saldo-display {
     background: var(--yellow);
@@ -344,4 +344,11 @@ nav {
     nav, .hero { flex-direction: column; padding: 20px; }
     #page-home { padding: 20px; }
     .hero-text h1 { font-size: 2.4rem; }
+}
+.coxinha-img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto 8px;
 }
