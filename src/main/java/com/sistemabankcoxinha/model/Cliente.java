@@ -21,6 +21,7 @@ public class Cliente {
     private Long id;
     private String nome;
     private Double saldo;
+    private String senha;
 
     @OneToMany(mappedBy = "cliente")
     private List<Movimentacao> movimentacoes;

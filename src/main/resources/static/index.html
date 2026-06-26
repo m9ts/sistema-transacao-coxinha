@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Coxinha Bank</title>
+    <title>Bankinha</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="icon" type="image/png" href="images/icon.png">
@@ -11,7 +11,7 @@
 <body>
 
 <nav id="navbar" style="display: none">
-    <div class="nav-logo"><span>Coxinha</span> Bank</div>
+    <div class="nav-logo"><span></span>Bankinha</div>
     <div class="nav-links">
         <a onclick="showPage('home')" id="nav-home" class="active">Cardápio</a>
         <a onclick="showPage('extrato')" id="nav-extrato">Extrato</a>
@@ -26,7 +26,7 @@
 <div id="page-login" class="page active">
     <div class="login-wrapper">
         <div class="login-card">
-            <h1>Bem-vindo ao <br><span>Coxinha Bank!</span></h1>
+            <h1>Bem-vindo ao <br><span>Bankinha!</span></h1>
             <p>Entre com seu cadastro ou crie uma conta nova.</p>
 
             <div class="login-tabs">
@@ -41,13 +41,22 @@
                         <option value="">Carregando clientes...</option>
                     </select>
                 </div>
+                <!-- NOVO CAMPO SENHA LOGIN -->
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="input-senha" placeholder="Digite sua senha">
+                </div>
                 <button class="btn-primary" onclick="fazerLogin()">Entrar no banco</button>
             </div>
 
             <div id="form-cadastro" style="display:none">
                 <div class="form-group">
                     <label>Seu nome</label>
-                    <input type="text" id="input-nome" placeholder="Ex: João da Silva">
+                    <input type="text" id="input-nome" placeholder="Ex: Cleiton">
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="input-senha-cadastro" placeholder="Crie uma senha">
                 </div>
                 <button class="btn-primary" onclick="cadastrarCliente()">Criar conta →</button>
                 <div class="login-divider">ou</div>
@@ -102,7 +111,7 @@
 <div id="page-extrato" class="page">
     <div class="extrato-header fade-in">
         <h1>Extrato de glutonaria</h1>
-        <p id="extrato-sub">Histórico completo das suas coxinhas</p>
+        <p id="extrato-sub">Aqui está seu histórico completo:</p>
     </div>
     <div class="saldo-card-extrato">
         <div>Saldo atual</div>
@@ -111,10 +120,18 @@
     </div>
     <table class="extrato-table">
         <thead>
-        <tr><th>Data/Hora</th><th>Sabor</th><th>Tipo</th><th>Valor</th></tr>
+        <tr>
+            <th>Data/Hora</th>
+            <th>Sabor</th>
+            <th>Tipo</th>
+            <th>Valor</th>
+            <th>Ações</th>
+        </tr>
         </thead>
         <tbody id="extrato-tbody">
-        <tr><td colspan="4"><div class="empty-state">Nenhuma movimentação ainda...</div></td></tr>
+        <tr>
+            <td colspan="5"><div class="empty-state">Nenhuma movimentação ainda...</div></td>
+        </tr>
         </tbody>
     </table>
 </div>
