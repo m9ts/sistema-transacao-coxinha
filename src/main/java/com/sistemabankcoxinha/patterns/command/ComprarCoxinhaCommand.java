@@ -27,6 +27,8 @@ public class ComprarCoxinhaCommand implements Command {
     private double trocoValor;
     @Getter
     private Movimentacao movimentacao;
+    @Getter
+    private Map<Integer, Integer> trocoNotas;
 
     public ComprarCoxinhaCommand(Cliente cliente, Coxinha coxinha,
                                  TrocoStrategy trocoStrategy,
@@ -53,20 +55,9 @@ public class ComprarCoxinhaCommand implements Command {
         double trocoCalculado = saldoAtual - valorCoxinha;
         List<SlotNota> slots = slotNotaRepository.findAll();
 
-        Map<Integer, Integer> trocoNotas = trocoStrategy.calcularTroco(trocoCalculado, slots);
+        this.trocoNotas = trocoStrategy.calcularTroco(trocoCalculado, slots);
 
-        // deduzir notas dos slots
-        for (Map.Entry<Integer, Integer> entry : trocoNotas.entrySet()) {
-            SlotNota slot = slotNotaRepository.findByValorNota(entry.getKey())
-                    .orElseThrow(() -> new RuntimeException("Slot não encontrado para nota " + entry.getKey()));
-            if (slot.getQtd() < entry.getValue()) {
-                throw new RuntimeException("Erro interno: quantidade insuficiente no slot " + entry.getKey());
-            }
-            slot.setQtd(slot.getQtd() - entry.getValue());
-            slotNotaRepository.save(slot);
-        }
-
-        cliente.setSaldo(0.0);
+        cliente.setSaldo(saldoAtual - valorCoxinha);
         clienteRepository.save(cliente);
 
         Movimentacao mov = Movimentacao.builder()

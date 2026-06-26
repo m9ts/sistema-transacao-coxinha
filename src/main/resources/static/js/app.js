@@ -2,31 +2,34 @@ const API = 'http://localhost:8080';
 const NOTAS = [2, 5, 10, 20, 50, 100, 200];
 
 const CARDAPIO = [
-    { sabor: 'frango', emoji: '<img src="/images/coxinha.png" class="coxinha-img">', preco: 8.0 },
-    { sabor: 'carne', emoji: '<img src="/images/coxinha.png" class="coxinha-img">', preco: 10.00 },
-    { sabor: 'costela', emoji: '<img src="/images/coxinha.png" class="coxinha-img">', preco: 10.00 },
-    { sabor: 'frango especial', emoji: '<img src="/images/coxinha-especial.png" class="coxinha-img">', preco: 10.0 },
-    { sabor: 'carne especial', emoji: '<img src="/images/coxinha-especial.png" class="coxinha-img">', preco: 8.0 }
+    {sabor: 'frango', emoji: '<img src="/images/coxinha.png" class="coxinha-img">', preco: 8.0},
+    {sabor: 'carne', emoji: '<img src="/images/coxinha.png" class="coxinha-img">', preco: 10.0},
+    {sabor: 'costela', emoji: '<img src="/images/coxinha.png" class="coxinha-img">', preco: 10.0},
+    {sabor: 'calabresa', emoji: '<img src="/images/coxinha.png" class="coxinha-img">', preco: 12.0},
+    {sabor: 'palmito', emoji: '<img src="/images/coxinha.png" class="coxinha-img">', preco: 15.0}
 ];
 
 let clienteLogado = null;
 let notaSelecionada = null;
+let timeoutEstorno = null;
 
 function toast(msg, tipo = 'info') {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.className = `show ${tipo}`;
-    setTimeout(() => { t.className = ''; }, 3000);
+    setTimeout(() => {
+        t.className = '';
+    }, 3000);
 }
 
 function formatarMoeda(valor) {
-    return parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    return parseFloat(valor).toLocaleString('pt-BR', {minimumFractionDigits: 2});
 }
 
 function formatarData(dataISO) {
     if (!dataISO) return '—';
     const d = new Date(dataISO);
-    return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
 }
 
 async function atualizarSaldoExibido() {
@@ -75,43 +78,87 @@ function switchTab(tab) {
         btnCad.classList.add('active');
         btnLogin.classList.remove('active');
     }
+    document.getElementById('input-senha').value = '';
+    document.getElementById('input-senha-cadastro').value = '';
+    document.getElementById('input-nome').value = '';
 }
 
 async function cadastrarCliente() {
     const nome = document.getElementById('input-nome').value.trim();
-    if (!nome) { toast('Digite seu nome!', 'error'); return; }
+    const senha = document.getElementById('input-senha-cadastro').value.trim();
+    if (!nome) {
+        toast('Digite seu nome!', 'error');
+        return;
+    }
+    if (!senha) {
+        toast('Crie uma senha!', 'error');
+        return;
+    }
     try {
         const res = await fetch(`${API}/clientes`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nome, saldo: 0 })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ nome, senha, saldo: 0 })
         });
-        if (!res.ok) throw new Error();
+        if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.erro || 'Erro ao cadastrar');
+        }
         toast('Conta criada com sucesso!', 'success');
+        document.getElementById('input-nome').value = '';
+        document.getElementById('input-senha-cadastro').value = '';
         switchTab('login');
         await carregarClientes();
-    } catch {
-        toast('Erro ao cadastrar. Verifique se o back-end está rodando.', 'error');
+    } catch (err) {
+        toast(err.message, 'error');
     }
 }
 
-function fazerLogin() {
+async function fazerLogin() {
     const sel = document.getElementById('select-cliente');
     const opt = sel.options[sel.selectedIndex];
-    if (!opt || !opt.value) { toast('Selecione um cliente!', 'error'); return; }
-    clienteLogado = {
-        id: parseInt(opt.value),
-        nome: opt.text,
-        saldo: parseFloat(opt.dataset.saldo) || 0
-    };
-    document.getElementById('page-login').classList.remove('active');
-    document.getElementById('navbar').style.display = 'flex';
-    atualizarSaldoExibido();  // busca saldo atualizado do back
-    renderCardapio();
-    renderNotas();
-    carregarSlots();          // pré-carrega slots para a página
-    showPage('home');
-    toast(`Bem-vindo(a), ${clienteLogado.nome}! 🍗`, 'success');
+    if (!opt || !opt.value) {
+        toast('Selecione um cliente!', 'error');
+        return;
+    }
+    const senha = document.getElementById('input-senha').value.trim();
+    if (!senha) {
+        toast('Digite sua senha!', 'error');
+        return;
+    }
+    try {
+        const res = await fetch(`${API}/login`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                clienteId: parseInt(opt.value),
+                senha: senha
+            })
+        });
+        if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.erro || 'Erro no login');
+        }
+        const cliente = await res.json();
+        clienteLogado = {
+            id: cliente.id,
+            nome: cliente.nome,
+            saldo: cliente.saldo || 0
+        };
+        document.getElementById('page-login').classList.remove('active');
+        document.getElementById('navbar').style.display = 'flex';
+        document.getElementById('input-senha').value = '';
+        document.getElementById('input-senha-cadastro').value = '';
+        document.getElementById('input-nome').value = '';
+        atualizarSaldoExibido();
+        renderCardapio();
+        renderNotas();
+        carregarSlots();
+        showPage('home');
+        toast(`Bem-vindo(a), ${clienteLogado.nome}!`, 'success');
+    } catch (err) {
+        toast(err.message, 'error');
+    }
 }
 
 function logout() {
@@ -122,6 +169,9 @@ function logout() {
     document.getElementById('page-home').classList.remove('active');
     document.getElementById('page-extrato').classList.remove('active');
     document.getElementById('page-slots').classList.remove('active');
+    document.getElementById('input-senha').value = '';
+    document.getElementById('input-senha-cadastro').value = '';
+    document.getElementById('input-nome').value = '';
     carregarClientes();
 }
 
@@ -151,12 +201,18 @@ function selecionarNota(valor, btn) {
 }
 
 async function inserirCredito() {
-    if (!clienteLogado) { toast('Faça login primeiro', 'error'); return; }
-    if (!notaSelecionada) { toast('Selecione uma nota!', 'error'); return; }
+    if (!clienteLogado) {
+        toast('Faça login primeiro', 'error');
+        return;
+    }
+    if (!notaSelecionada) {
+        toast('Selecione uma nota!', 'error');
+        return;
+    }
     try {
         const res = await fetch(`${API}/credito`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 clienteId: clienteLogado.id,
                 valorNota: notaSelecionada
@@ -174,25 +230,80 @@ async function inserirCredito() {
     }
 }
 
+function atualizarPrecoFrango() {
+    const checkbox = document.getElementById('recheio-frango');
+    const isChecked = checkbox ? checkbox.checked : false;
+    const nomeEl = document.getElementById('nome-frango');
+    const precoEl = document.getElementById('preco-frango');
+    if (nomeEl && precoEl) {
+        nomeEl.innerText = isChecked ? 'Frango Especial' : 'Frango';
+        const preco = isChecked ? 10.0 : 8.0;
+        precoEl.innerText = `R$ ${formatarMoeda(preco)}`;
+    }
+}
+
+function atualizarPrecoCarne() {
+    const checkbox = document.getElementById('desconto-carne');
+    const isChecked = checkbox ? checkbox.checked : false;
+    const nomeEl = document.getElementById('nome-carne');
+    const precoEl = document.getElementById('preco-carne');
+    if (nomeEl && precoEl) {
+        nomeEl.innerText = isChecked ? 'Carne (com 20% de desconto)' : 'Carne';
+        const preco = isChecked ? 8.0 : 10.0;
+        precoEl.innerText = `R$ ${formatarMoeda(preco)}`;
+    }
+}
+
 async function comprarCoxinha(sabor, preco) {
-    if (!clienteLogado) { toast('Faça login', 'error'); return; }
-    if (clienteLogado.saldo < preco) {
+    if (!clienteLogado) {
+        toast('Faça login', 'error');
+        return;
+    }
+
+    let adicionarRecheio = false;
+    let aplicarDesconto = false;
+
+    if (sabor === 'frango') {
+        const checkbox = document.getElementById('recheio-frango');
+        adicionarRecheio = checkbox ? checkbox.checked : false;
+    }
+    if (sabor === 'carne') {
+        const checkbox = document.getElementById('desconto-carne');
+        aplicarDesconto = checkbox ? checkbox.checked : false;
+    }
+
+    const precoEfetivo = (sabor === 'frango' && adicionarRecheio) ? 10.0 :
+        (sabor === 'carne' && aplicarDesconto) ? 8.0 :
+            preco;
+
+    if (clienteLogado.saldo < precoEfetivo) {
         toast(`Saldo insuficiente! Seu saldo: R$ ${formatarMoeda(clienteLogado.saldo)}`, 'error');
         return;
     }
+
     try {
         const res = await fetch(`${API}/compras`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 clienteId: clienteLogado.id,
-                sabor: sabor
-                // não envia notaInserida, pois o back usa o saldo acumulado
+                sabor: sabor,
+                adicionarRecheio: adicionarRecheio,
+                aplicarDesconto: aplicarDesconto
             })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.mensagem || 'Erro na compra');
-        toast(`${data.mensagem} | Troco: R$ ${formatarMoeda(data.troco)}`, 'success');
+
+        let msg = `${data.mensagem} | Troco: R$ ${formatarMoeda(data.troco)}`;
+        if (data.notasTroco && Object.keys(data.notasTroco).length > 0) {
+            const notasStr = Object.entries(data.notasTroco)
+                .map(([nota, qtd]) => `${qtd}x R$${nota}`)
+                .join(', ');
+            msg += ` | Notas: ${notasStr}`;
+        }
+        toast(msg, 'success');
+
         await atualizarSaldoExibido();
         await carregarExtrato();
     } catch (err) {
@@ -203,20 +314,57 @@ async function comprarCoxinha(sabor, preco) {
 function renderCardapio() {
     const grid = document.getElementById('cardapio-grid');
     if (!grid) return;
-    grid.innerHTML = CARDAPIO.map((item, i) => `
-        <div class="coxinha-card fade-in" style="animation-delay:${i*0.05}s" onclick="comprarCoxinha('${item.sabor}', ${item.preco})">
-            <div class="coxinha-emoji">${item.emoji}</div>
-            <h3>${item.sabor}</h3>
-            <div class="coxinha-price">R$ ${formatarMoeda(item.preco)}</div>
-        </div>
-    `).join('');
+
+    grid.innerHTML = CARDAPIO.map((item, i) => {
+        if (item.sabor === 'frango') {
+            return `
+                <div class="coxinha-card fade-in" style="animation-delay:${i * 0.05}s">
+                    <div class="coxinha-emoji">${item.emoji}</div>
+                    <h3 id="nome-frango">Frango</h3>
+                    <div class="coxinha-price" id="preco-frango">R$ ${formatarMoeda(8.0)}</div>
+                    <label style="display:block; margin-top: 10px; font-size: 0.85rem; cursor:pointer;">
+                        <input type="checkbox" id="recheio-frango" onchange="atualizarPrecoFrango()">
+                        Adicionar recheio (+R$2,00)
+                    </label>
+                    <div style="margin-top: 10px;">
+                        <button class="btn-comprar" onclick="comprarCoxinha('frango', 8.0)">Comprar</button>
+                    </div>
+                </div>
+            `;
+        } else if (item.sabor === 'carne') {
+            return `
+                <div class="coxinha-card fade-in" style="animation-delay:${i * 0.05}s">
+                    <div class="coxinha-emoji">${item.emoji}</div>
+                    <h3 id="nome-carne">Carne</h3>
+                    <div class="coxinha-price" id="preco-carne">R$ ${formatarMoeda(10.0)}</div>
+                    <label style="display:block; margin-top: 10px; font-size: 0.85rem; cursor:pointer;">
+                        <input type="checkbox" id="desconto-carne" onchange="atualizarPrecoCarne()">
+                        Aplicar desconto (20%)
+                    </label>
+                    <div style="margin-top: 10px;">
+                        <button class="btn-comprar" onclick="comprarCoxinha('carne', 10.0)">Comprar</button>
+                    </div>
+                </div>
+            `;
+        } else {
+            return `
+                <div class="coxinha-card fade-in" style="animation-delay:${i * 0.05}s" onclick="comprarCoxinha('${item.sabor}', ${item.preco})">
+                    <div class="coxinha-emoji">${item.emoji}</div>
+                    <h3>${item.sabor}</h3>
+                    <div class="coxinha-price">R$ ${formatarMoeda(item.preco)}</div>
+                </div>
+            `;
+        }
+    }).join('');
 }
 
 function popularSelectsTroca() {
     const selectOrigem = document.getElementById('sabor-origem');
     const selectDestino = document.getElementById('sabor-destino');
     if (!selectOrigem) return;
-    const opcoes = CARDAPIO.map(item => `<option value="${item.sabor}">${item.sabor}</option>`).join('');
+
+    const sabores = ['frango', 'carne', 'costela', 'frango especial', 'carne especial', 'calabresa', 'palmito'];
+    const opcoes = sabores.map(s => `<option value="${s}">${s}</option>`).join('');
     selectOrigem.innerHTML = '<option value="">Sabor original</option>' + opcoes;
     selectDestino.innerHTML = '<option value="">Novo sabor</option>' + opcoes;
 }
@@ -224,12 +372,18 @@ function popularSelectsTroca() {
 async function trocarSabor() {
     const origem = document.getElementById('sabor-origem').value;
     const destino = document.getElementById('sabor-destino').value;
-    if (!origem || !destino) { toast('Selecione ambos os sabores', 'error'); return; }
-    if (!clienteLogado) { toast('Faça login', 'error'); return; }
+    if (!origem || !destino) {
+        toast('Selecione ambos os sabores', 'error');
+        return;
+    }
+    if (!clienteLogado) {
+        toast('Faça login', 'error');
+        return;
+    }
     try {
         const res = await fetch(`${API}/trocar-sabor`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 clienteId: clienteLogado.id,
                 saborOrigem: origem,
@@ -246,27 +400,78 @@ async function trocarSabor() {
     }
 }
 
+async function estornarCompra(movimentacaoId, botao) {
+    if (!clienteLogado) {
+        toast('Faça login', 'error');
+        return;
+    }
+
+    if (botao.classList.contains('confirmando')) {
+        if (timeoutEstorno) {
+            clearTimeout(timeoutEstorno);
+            timeoutEstorno = null;
+        }
+
+        try {
+            const res = await fetch(`${API}/estorno/${movimentacaoId}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.mensagem || 'Erro ao estornar');
+            toast(data.mensagem, 'success');
+            await atualizarSaldoExibido();
+            await carregarExtrato();
+        } catch (err) {
+            toast(err.message, 'error');
+        }
+        return;
+    }
+
+    const textoOriginal = botao.textContent;
+    botao.textContent = 'Confirmar?';
+    botao.classList.add('confirmando');
+    botao.style.background = '#C0392B';
+    botao.style.color = 'white';
+    botao.style.border = '2px solid #922B21';
+
+    if (timeoutEstorno) clearTimeout(timeoutEstorno);
+    timeoutEstorno = setTimeout(() => {
+        botao.textContent = textoOriginal;
+        botao.classList.remove('confirmando');
+        botao.style.background = '';
+        botao.style.color = '';
+        botao.style.border = '';
+        timeoutEstorno = null;
+    }, 5000);
+}
+
 async function carregarExtrato() {
     if (!clienteLogado) return;
     try {
         const res = await fetch(`${API}/clientes/${clienteLogado.id}/extrato`);
         const data = await res.json();
         document.getElementById('extrato-saldo').innerText = formatarMoeda(data.saldo || 0);
-        document.getElementById('extrato-sub').innerHTML = `Olá, ${data.cliente}! Histórico completo.`;
+        document.getElementById('extrato-sub').innerHTML = `Olá, ${data.cliente}! Aqui está seu histórico completo: `;
         const tbody = document.getElementById('extrato-tbody');
         const movs = data.movimentacoes || [];
         if (movs.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">🍽️ Nenhuma movimentação ainda</div></td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">Nenhuma movimentação ainda...</div></td></tr>`;
             return;
         }
         tbody.innerHTML = movs.slice().reverse().map(m => `
-            <tr>
-                <td>${formatarData(m.dataHora)}</td>
-                <td>${m.sabor || '—'}</td>
-                <td><span class="badge ${m.tipoOperacao === 'COMPRA' ? 'badge-compra' : 'badge-troca'}">${m.tipoOperacao}</span></td>
-                <td>R$ ${formatarMoeda(m.valor)}</td>
-            </tr>
-        `).join('');
+    <tr>
+        <td>${formatarData(m.dataHora)}</td>
+        <td>${m.sabor || '—'}</td>
+        <td><span class="badge ${m.tipoOperacao === 'COMPRA' ? 'badge-compra' : m.tipoOperacao === 'ESTORNO' ? 'badge-estorno' : 'badge-troca'}">${m.tipoOperacao}</span></td>
+        <td>R$ ${formatarMoeda(m.valor)}</td>
+        <td>
+            ${m.tipoOperacao === 'COMPRA' && !m.estornado ? `
+                <button class="btn-estornar" onclick="estornarCompra(${m.id}, this)">↩ Estornar</button>
+            ` : ''}
+        </td>
+    </tr>
+`).join('');
     } catch (err) {
         toast('Erro ao carregar extrato', 'error');
     }
@@ -281,7 +486,7 @@ async function carregarSlots() {
             grid.innerHTML = '<div>Nenhum slot configurado</div>';
             return;
         }
-        const ordenados = slots.sort((a,b) => a.valorNota - b.valorNota);
+        const ordenados = slots.sort((a, b) => a.valorNota - b.valorNota);
         grid.innerHTML = ordenados.map(s => `
             <div class="slot-card">
                 <div class="slot-valor">R$ ${s.valorNota}</div>

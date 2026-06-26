@@ -10,4 +10,6 @@ public class CompraRequestDTO {
     private Long clienteId;
     private String sabor;
     private Integer notaInserida;
+    private boolean adicionarRecheio;
+    private boolean aplicarDesconto;
 }

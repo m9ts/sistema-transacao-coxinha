@@ -33,7 +33,11 @@ public class CompraService {
         Cliente cliente = clienteRepository.findById(dto.getClienteId())
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
-        Coxinha coxinha = CoxinhaFactory.criarCoxinha(dto.getSabor());
+        Coxinha coxinha = CoxinhaFactory.criarCoxinha(
+                dto.getSabor(),
+                dto.isAdicionarRecheio(),
+                dto.isAplicarDesconto()
+        );
 
         ComprarCoxinhaCommand command = new ComprarCoxinhaCommand(
                 cliente,
@@ -45,15 +49,16 @@ public class CompraService {
         );
         command.executar();
 
-        // dispara os observers
+        // dispara os observers (log, extrato, estoque)
         compraDisparaEvento.publicar(command.getMovimentacao());
 
         CompraResponseDTO response = new CompraResponseDTO();
-        response.setMensagem("Compra realizada com sucesso. Troco dado em notas.");
+        response.setMensagem("Compra realizada com sucesso! Troco mantido como crédito.");
         response.setSabor(coxinha.getSabor());
         response.setValorCompra(coxinha.getPreco());
         response.setValorPago((int) (coxinha.getPreco() + command.getTrocoValor()));
         response.setTroco((int) command.getTrocoValor());
+        response.setNotasTroco(command.getTrocoNotas());
 
         return response;
     }
