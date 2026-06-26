@@ -9,7 +9,7 @@ import java.util.List;
 public class CompraDisparaEvento {
     private final List<CompraObserver> observers;
 
-    // injeta os todos os @Component que implementam CompraObserrver
+    // injeta todos os @Component que implementam CompraObserrver
     public CompraDisparaEvento(List<CompraObserver> observers) {
         this.observers = observers;
     }
