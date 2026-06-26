@@ -25,6 +25,7 @@ public class Movimentacao {
     private Double valor;
     private String tipoOperacao;
     private LocalDateTime dataHora;
+    private boolean estornado = false;
 
     @ManyToOne
     @JoinColumn(name = "cliente_id")
